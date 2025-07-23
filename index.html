@@ -32,7 +32,7 @@
             margin-bottom: 50px;
             padding: 40px;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -73,7 +73,7 @@
             background: rgba(255, 255, 255, 0.15);
             padding: 15px 25px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
         }
 
         .stat-number {
@@ -100,10 +100,11 @@
             padding: 35px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.4s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            will-change: transform;
         }
 
         .doc-card::before {
@@ -114,7 +115,7 @@
             right: 0;
             height: 6px;
             background: var(--card-gradient);
-            transition: height 0.3s ease;
+            transition: height 0.2s ease;
         }
 
         .doc-card:hover::before {
@@ -122,8 +123,8 @@
         }
 
         .doc-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.2);
             background: rgba(255, 255, 255, 1);
         }
 
@@ -157,6 +158,11 @@
             background: var(--card-gradient);
             color: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.15s ease;
+        }
+
+        .doc-card:hover .doc-icon {
+            transform: scale(1.05);
         }
 
         .doc-title {
@@ -167,6 +173,11 @@
             font-size: 2.2em;
             color: #2d3748;
             margin-bottom: 8px;
+            transition: color 0.15s ease;
+        }
+
+        .doc-card:hover .doc-title h2 {
+            color: #1a202c;
         }
 
         .doc-title .status {
@@ -210,7 +221,7 @@
             background: #f8f9fa;
             border-radius: 10px;
             border-left: 4px solid var(--feature-color);
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
         }
 
         .feature-item:hover {
@@ -284,7 +295,7 @@
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -315,7 +326,7 @@
 
         .quick-access {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(5px);
             border-radius: 20px;
             padding: 30px;
             margin-top: 40px;
@@ -343,13 +354,78 @@
             border-radius: 25px;
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.15s ease;
+            backdrop-filter: blur(5px);
         }
 
         .quick-link:hover {
             background: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
+        }
+
+        /* Optimized floating elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float 25s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Notification styles - moved to CSS for better performance */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-weight: 500;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(100%);
+            opacity: 0;
         }
 
         @media (max-width: 768px) {
@@ -387,56 +463,27 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            /* Reduce floating elements on mobile */
+            .floating-element:nth-child(n+6) {
+                display: none;
+            }
         }
 
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .floating-element {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 20s infinite linear;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
-            }
+        /* Performance optimizations */
+        .doc-card, .feature-item, .btn, .quick-link {
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
     </style>
 </head>
 <body>
     <div class="floating-elements">
-        <div class="floating-element" style="left: 10%; animation-delay: 0s;"></div>
-        <div class="floating-element" style="left: 20%; animation-delay: 2s;"></div>
-        <div class="floating-element" style="left: 30%; animation-delay: 4s;"></div>
-        <div class="floating-element" style="left: 40%; animation-delay: 6s;"></div>
-        <div class="floating-element" style="left: 50%; animation-delay: 8s;"></div>
-        <div class="floating-element" style="left: 60%; animation-delay: 10s;"></div>
-        <div class="floating-element" style="left: 70%; animation-delay: 12s;"></div>
-        <div class="floating-element" style="left: 80%; animation-delay: 14s;"></div>
-        <div class="floating-element" style="left: 90%; animation-delay: 16s;"></div>
+        <div class="floating-element" style="left: 15%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="left: 35%; animation-delay: 5s;"></div>
+        <div class="floating-element" style="left: 55%; animation-delay: 10s;"></div>
+        <div class="floating-element" style="left: 75%; animation-delay: 15s;"></div>
+        <div class="floating-element" style="left: 25%; animation-delay: 20s;"></div>
     </div>
 
     <div class="container">
@@ -467,7 +514,7 @@
 
         <div class="docs-grid">
             <!-- Testing Documentation Card -->
-            <div class="doc-card testing" onclick="navigateToDoc('testing')">
+            <div class="doc-card testing" onclick="navigateToDoc('testing', this)">
                 <div class="doc-header">
                     <div class="doc-icon">🧪</div>
                     <div class="doc-title">
@@ -533,7 +580,7 @@
             </div>
 
             <!-- Monitoring Documentation Card -->
-            <div class="doc-card monitoring" onclick="navigateToDoc('monitoring')">
+            <div class="doc-card monitoring" onclick="navigateToDoc('monitoring', this)">
                 <div class="doc-header">
                     <div class="doc-icon">📡</div>
                     <div class="doc-title">
@@ -599,7 +646,7 @@
             </div>
 
             <!-- Data Visibility Documentation Card -->
-            <div class="doc-card data-visibility" onclick="navigateToDoc('data-visibility')">
+            <div class="doc-card data-visibility" onclick="navigateToDoc('data-visibility', this)">
                 <div class="doc-header">
                     <div class="doc-icon">📈</div>
                     <div class="doc-title">
@@ -665,7 +712,7 @@
             </div>
 
             <!-- Authorization Documentation Card -->
-            <div class="doc-card authorization" onclick="navigateToDoc('authorization')">
+            <div class="doc-card authorization" onclick="navigateToDoc('authorization', this)">
                 <div class="doc-header">
                     <div class="doc-icon">🔐</div>
                     <div class="doc-title">
@@ -745,50 +792,50 @@
     </div>
 
     <script>
-        function navigateToDoc(docType) {
-            // Simulate navigation - in real implementation, this would route to actual documentation
+        // Optimized notification system
+        let notificationTimeout;
+
+        function navigateToDoc(docType, cardElement) {
             console.log(`Navigating to ${docType} documentation`);
 
-            // Add click animation
-            const card = event.currentTarget;
+            // Add subtle click feedback
+            cardElement.style.transform = 'translateY(-6px) scale(0.98)';
+            setTimeout(() => {
+                cardElement.style.transform = '';
+            }, 150);
 
-            // Show notification
+            // Show optimized notification
             showNotification(`Loading ${docType.charAt(0).toUpperCase() + docType.slice(1)} Documentation...`);
         }
 
         function showNotification(message) {
+            // Clear existing notification
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Clear existing timeout
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+            }
+
             // Create notification element
             const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                z-index: 1000;
-                font-weight: 500;
-                animation: slideIn 0.3s ease;
-            `;
+            notification.className = 'notification';
             notification.textContent = message;
-
-            // Add slide-in animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-            `;
-            document.head.appendChild(style);
-
             document.body.appendChild(notification);
 
-            // Remove notification after 3 seconds
-            setTimeout(() => {
-                notification.style.animation = 'slideIn 0.3s ease reverse';
+            // Trigger show animation
+            requestAnimationFrame(() => {
+                notification.classList.add('show');
+            });
+
+            // Auto-hide after 3 seconds
+            notificationTimeout = setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+
                 setTimeout(() => {
                     if (notification.parentNode) {
                         notification.parentNode.removeChild(notification);
@@ -797,12 +844,22 @@
             }, 3000);
         }
 
-        // Add some interactive effects
+        // Optimized performance
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add intersection observer for performance on scroll
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                });
 
-
-        document.addEventListener('mouseleave', (e) => {
-            if (e.target.classList.contains('doc-card')) {
-                e.target.style.transform = '';
+                document.querySelectorAll('.doc-card').forEach(card => {
+                    observer.observe(card);
+                });
             }
         });
     </script>
