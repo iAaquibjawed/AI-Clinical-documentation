@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CDSS - Documentation Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.4em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .doc-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--card-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .doc-card:hover::before {
+            height: 12px;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .doc-card.testing {
+            --card-gradient: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .doc-card.monitoring {
+            --card-gradient: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .doc-card.data-visibility {
+            --card-gradient: linear-gradient(135deg, #a8e6cf, #88d8a3);
+        }
+
+        .doc-card.authorization {
+            --card-gradient: linear-gradient(135deg, #ffd93d, #ff6b6b);
+        }
+
+        .doc-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .doc-icon {
+            font-size: 3em;
+            margin-right: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: var(--card-gradient);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .doc-title {
+            flex: 1;
+        }
+
+        .doc-title h2 {
+            font-size: 2.2em;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .doc-title .status {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .doc-description {
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid var(--feature-color);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .feature-text {
+            font-size: 0.95em;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .testing .feature-item {
+            --feature-color: #ff6b6b;
+        }
+
+        .monitoring .feature-item {
+            --feature-color: #4ecdc4;
+        }
+
+        .data-visibility .feature-item {
+            --feature-color: #a8e6cf;
+        }
+
+        .authorization .feature-item {
+            --feature-color: #ffd93d;
+        }
+
+        .doc-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .doc-stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .doc-stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .doc-stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--card-gradient);
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .quick-access {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-access h3 {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-link {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .docs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .doc-card {
+                padding: 25px;
+            }
+
+            .doc-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                gap: 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="floating-element" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="floating-element" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="floating-element" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="floating-element" style="left: 60%; animation-delay: 10s;"></div>
+        <div class="floating-element" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="floating-element" style="left: 80%; animation-delay: 14s;"></div>
+        <div class="floating-element" style="left: 90%; animation-delay: 16s;"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏥 AI Clinical Decision Support System</h1>
+            <p>Comprehensive Documentation Hub</p>
+            <p class="subtitle">Enterprise-grade healthcare AI platform documentation</p>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Core Modules</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime Target</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">HIPAA</div>
+                    <div class="stat-label">Compliant</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Monitoring</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="docs-grid">
+            <!-- Testing Documentation Card -->
+            <div class="doc-card testing" onclick="navigateToDoc('testing')">
+                <div class="doc-header">
+                    <div class="doc-icon">🧪</div>
+                    <div class="doc-title">
+                        <h2>Testing Strategy</h2>
+                        <span class="status draft">Coming Soon</span>
+                    </div>
+                </div>
+
+                <div class="doc-description">
+                    Comprehensive testing framework ensuring reliability and safety in clinical decision-making. Covers unit testing, integration testing, ML model validation, and regulatory compliance testing for healthcare AI systems.
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span class="feature-text">Automated Test Suites</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🤖</span>
+                        <span class="feature-text">ML Model Validation</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🏥</span>
+                        <span class="feature-text">Clinical Safety Testing</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span class="feature-text">Performance Benchmarks</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔒</span>
+                        <span class="feature-text">Security Penetration Tests</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📋</span>
+                        <span class="feature-text">Regulatory Compliance</span>
+                    </div>
+                </div>
+
+                <div class="doc-stats">
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">85%</div>
+                        <div class="doc-stat-label">Test Coverage</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">12</div>
+                        <div class="doc-stat-label">Test Types</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">CI/CD</div>
+                        <div class="doc-stat-label">Integration</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-primary">
+                        <span>📖</span> View Documentation
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <span>⚙️</span> Test Suite Setup
+                    </a>
+                </div>
+            </div>
+
+            <!-- Monitoring Documentation Card -->
+            <div class="doc-card monitoring" onclick="navigateToDoc('monitoring')">
+                <div class="doc-header">
+                    <div class="doc-icon">📡</div>
+                    <div class="doc-title">
+                        <h2>Monitoring & Observability</h2>
+                        <span class="status ready">Available</span>
+                    </div>
+                </div>
+
+                <div class="doc-description">
+                    Real-time monitoring and observability strategy for AI-driven clinical systems. Includes performance metrics, ML model drift detection, alerting systems, and rollback procedures for mission-critical healthcare operations.
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span class="feature-text">Real-time Dashboards</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🤖</span>
+                        <span class="feature-text">ML Model Drift Detection</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🚨</span>
+                        <span class="feature-text">Intelligent Alerting</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📱</span>
+                        <span class="feature-text">IoT Device Monitoring</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔄</span>
+                        <span class="feature-text">Automated Rollback</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📋</span>
+                        <span class="feature-text">Compliance Logging</span>
+                    </div>
+                </div>
+
+                <div class="doc-stats">
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">6</div>
+                        <div class="doc-stat-label">Monitor Areas</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">5</div>
+                        <div class="doc-stat-label">Stack Layers</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">24/7</div>
+                        <div class="doc-stat-label">Coverage</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-primary">
+                        <span>📖</span> View Documentation
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <span>📊</span> Setup Monitoring
+                    </a>
+                </div>
+            </div>
+
+            <!-- Data Visibility Documentation Card -->
+            <div class="doc-card data-visibility" onclick="navigateToDoc('data-visibility')">
+                <div class="doc-header">
+                    <div class="doc-icon">📈</div>
+                    <div class="doc-title">
+                        <h2>Data Visibility & Analytics</h2>
+                        <span class="status draft">Coming Soon</span>
+                    </div>
+                </div>
+
+                <div class="doc-description">
+                    Advanced data visualization and analytics framework for clinical insights. Features real-time patient analytics, predictive modeling dashboards, population health metrics, and interactive clinical decision support visualizations.
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span class="feature-text">Interactive Dashboards</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔮</span>
+                        <span class="feature-text">Predictive Analytics</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">👥</span>
+                        <span class="feature-text">Population Health Metrics</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span class="feature-text">Real-time Data Streams</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <span class="feature-text">Clinical Decision Trees</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📱</span>
+                        <span class="feature-text">Mobile-First Design</span>
+                    </div>
+                </div>
+
+                <div class="doc-stats">
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">15+</div>
+                        <div class="doc-stat-label">Chart Types</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">Real-time</div>
+                        <div class="doc-stat-label">Updates</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">GDPR</div>
+                        <div class="doc-stat-label">Compliant</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="data-visibility.html" class="btn btn-primary">
+                        <span>📖</span> View Documentation
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <span>📈</span> Dashboard Setup
+                    </a>
+                </div>
+            </div>
+
+            <!-- Authorization Documentation Card -->
+            <div class="doc-card authorization" onclick="navigateToDoc('authorization')">
+                <div class="doc-header">
+                    <div class="doc-icon">🔐</div>
+                    <div class="doc-title">
+                        <h2>Authorization & Security</h2>
+                        <span class="status ready">Available</span>
+                    </div>
+                </div>
+
+                <div class="doc-description">
+                    Comprehensive security and authorization framework implementing Role-Based Access Control (RBAC) with OAuth 2.0 and JWT. Ensures secure, auditable, and compliant access to sensitive healthcare data and clinical decision tools.
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">👤</span>
+                        <span class="feature-text">Role-Based Access Control</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔑</span>
+                        <span class="feature-text">OAuth 2.0 + JWT Tokens</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🏥</span>
+                        <span class="feature-text">NHS SSO Integration</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📋</span>
+                        <span class="feature-text">Audit Trail Logging</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🛡️</span>
+                        <span class="feature-text">Multi-factor Authentication</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span class="feature-text">Fine-grained Permissions</span>
+                    </div>
+                </div>
+
+                <div class="doc-stats">
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">5</div>
+                        <div class="doc-stat-label">User Roles</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">OAuth 2.0</div>
+                        <div class="doc-stat-label">Standard</div>
+                    </div>
+                    <div class="doc-stat">
+                        <div class="doc-stat-number">HIPAA</div>
+                        <div class="doc-stat-label">Compliant</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-primary">
+                        <span>📖</span> View Documentation
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <span>🔧</span> Setup Guide
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-access">
+            <h3>🚀 Quick Access Links</h3>
+            <div class="quick-links">
+                <a href="#" class="quick-link">📋 System Overview</a>
+                <a href="#" class="quick-link">⚙️ Configuration Guide</a>
+                <a href="#" class="quick-link">🔧 API Reference</a>
+                <a href="#" class="quick-link">📞 Support Center</a>
+                <a href="#" class="quick-link">📚 Training Materials</a>
+                <a href="#" class="quick-link">🏥 Clinical Workflows</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateToDoc(docType) {
+            // Simulate navigation - in real implementation, this would route to actual documentation
+            console.log(`Navigating to ${docType} documentation`);
+
+            // Add click animation
+            const card = event.currentTarget;
+
+            // Show notification
+            showNotification(`Loading ${docType.charAt(0).toUpperCase() + docType.slice(1)} Documentation...`);
+        }
+
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 1000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+
+            // Add slide-in animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Add some interactive effects
+
+
+        document.addEventListener('mouseleave', (e) => {
+            if (e.target.classList.contains('doc-card')) {
+                e.target.style.transform = '';
+            }
+        });
+    </script>
+</body>
+</html>

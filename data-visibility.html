@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visibility & Access Control - AI Clinical Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            backdrop-filter: blur(15px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #e74c3c, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            color: #7f8c8d;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .data-landscape {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-left: 6px solid;
+        }
+
+        .data-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: inherit;
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .data-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .data-card.public {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(46, 204, 113, 0.02));
+        }
+
+        .data-card.freemium {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.05), rgba(230, 126, 34, 0.02));
+        }
+
+        .data-card.restricted {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.05), rgba(192, 57, 43, 0.02));
+        }
+
+        .data-card.private {
+            border-left-color: #9b59b6;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.05), rgba(142, 68, 173, 0.02));
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .data-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .access-badge {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .access-public { background: #d5f4e6; color: #27ae60; }
+        .access-freemium { background: #fef5e7; color: #f39c12; }
+        .access-restricted { background: #fbeaea; color: #e74c3c; }
+        .access-private { background: #f4ecf7; color: #9b59b6; }
+
+        .data-source {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .licensing-info {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .licensing-info h4 {
+            color: #2980b9;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .licensing-info p {
+            color: #34495e;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .rbac-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 50px 0;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .rbac-section h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .role-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .role-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .role-permissions {
+            list-style: none;
+            padding: 0;
+        }
+
+        .role-permissions li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+            opacity: 0.9;
+        }
+
+        .role-permissions li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .compliance-matrix {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 50px 0;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .compliance-matrix h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1em;
+            margin: 20px 0;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .matrix-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .matrix-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .security-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .security-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
+        }
+
+        .security-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #e74c3c;
+        }
+
+        .modal h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .detail-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-section h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .detail-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .detail-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .detail-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .data-landscape {
+                grid-template-columns: 1fr;
+            }
+
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Data Visibility & Access Control</h1>
+            <p>Comprehensive data access protocols, licensing pathways, and role-based permissions for AI Clinical Decision Support System</p>
+        </div>
+
+        <div class="data-landscape">
+            <div class="data-card public" onclick="openModal('public-data')">
+                <div class="data-header">
+                    <div class="data-title">📘 Open Medical Guidelines</div>
+                    <div class="access-badge access-public">Public</div>
+                </div>
+                <div class="data-source">NICE, PubMed, Cochrane</div>
+                <div class="licensing-info">
+                    <h4>✅ No License Required</h4>
+                    <p>Publicly accessible medical guidelines and research papers</p>
+                </div>
+            </div>
+
+            <div class="data-card freemium" onclick="openModal('drug-data')">
+                <div class="data-header">
+                    <div class="data-title">💊 Drug Databases</div>
+                    <div class="access-badge access-freemium">Freemium</div>
+                </div>
+                <div class="data-source">DrugBank, DailyMed, RxNorm</div>
+                <div class="licensing-info">
+                    <h4>⚠️ Mixed Licensing</h4>
+                    <p>Free for research, commercial license required for production</p>
+                </div>
+            </div>
+
+            <div class="data-card restricted" onclick="openModal('clinical-data')">
+                <div class="data-header">
+                    <div class="data-title">🏥 Clinical Datasets</div>
+                    <div class="access-badge access-restricted">Restricted</div>
+                </div>
+                <div class="data-source">MIMIC-IV, PhysioNet</div>
+                <div class="licensing-info">
+                    <h4>🔐 Credentialing Required</h4>
+                    <p>Data Use Agreement (DUA) and PhysioNet approval needed</p>
+                </div>
+            </div>
+
+            <div class="data-card private" onclick="openModal('ehr-data')">
+                <div class="data-header">
+                    <div class="data-title">📋 EHR/Patient Data</div>
+                    <div class="access-badge access-private">Private</div>
+                </div>
+                <div class="data-source">NHS, Integrated Health Systems</div>
+                <div class="licensing-info">
+                    <h4>🛡️ NHS Compliance Required</h4>
+                    <p>Must comply with NHS IG Toolkit / DSPT regulations</p>
+                </div>
+            </div>
+
+            <div class="data-card freemium" onclick="openModal('prescription-data')">
+                <div class="data-header">
+                    <div class="data-title">💉 Prescription History</div>
+                    <div class="access-badge access-freemium">Mixed</div>
+                </div>
+                <div class="data-source">OpenPrescribing, NHS Digital</div>
+                <div class="licensing-info">
+                    <h4>📊 Tiered Access</h4>
+                    <p>Public data available; deeper insights via access request</p>
+                </div>
+            </div>
+
+            <div class="data-card private" onclick="openModal('iot-data')">
+                <div class="data-header">
+                    <div class="data-title">📱 IoT Data</div>
+                    <div class="access-badge access-private">Private</div>
+                </div>
+                <div class="data-source">Pillboxes, Mobile Apps</div>
+                <div class="licensing-info">
+                    <h4>✋ Consent Required</h4>
+                    <p>Explicit user consent needed from patients</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rbac-section">
+            <h2>👥 Role-Based Access Control (RBAC)</h2>
+            <div class="roles-grid">
+                <div class="role-card" onclick="openModal('patient-role')">
+                    <div class="role-title">
+                        <span>👤</span> Patient
+                    </div>
+                    <ul class="role-permissions">
+                        <li>Own EHR records</li>
+                        <li>Personal prescriptions</li>
+                        <li>Symptom history</li>
+                        <li>Feedback data</li>
+                    </ul>
+                </div>
+
+                <div class="role-card" onclick="openModal('doctor-role')">
+                    <div class="role-title">
+                        <span>👨‍⚕️</span> Doctor/Clinician
+                    </div>
+                    <ul class="role-permissions">
+                        <li>Assigned patient records</li>
+                        <li>System-wide alerts</li>
+                        <li>AI recommendations</li>
+                        <li>Clinical decision support</li>
+                    </ul>
+                </div>
+
+                <div class="role-card" onclick="openModal('pharmacist-role')">
+                    <div class="role-title">
+                        <span>💊</span> Pharmacist
+                    </div>
+                    <ul class="role-permissions">
+                        <li>Drug warnings</li>
+                        <li>AI suggestions</li>
+                        <li>Local inventory</li>
+                        <li>Prescription trends</li>
+                    </ul>
+                </div>
+
+                <div class="role-card" onclick="openModal('admin-role')">
+                    <div class="role-title">
+                        <span>⚙️</span> Admin
+                    </div>
+                    <ul class="role-permissions">
+                        <li>Full system access</li>
+                        <li>Monitoring tools</li>
+                        <li>Audit logs</li>
+                        <li>System configuration</li>
+                    </ul>
+                </div>
+
+                <div class="role-card" onclick="openModal('researcher-role')">
+                    <div class="role-title">
+                        <span>🔬</span> ML/Research
+                    </div>
+                    <ul class="role-permissions">
+                        <li>Anonymized data only</li>
+                        <li>Model training datasets</li>
+                        <li>Statistical analysis</li>
+                        <li>Research outputs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="compliance-matrix">
+            <h2>📜 Licensing & Compliance Matrix</h2>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>Dataset</th>
+                        <th>License</th>
+                        <th>Approval Process</th>
+                        <th>Key Requirements</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>MIMIC-IV</strong></td>
+                        <td>PhysioNet Credential + DUA</td>
+                        <td>Apply at physionet.org</td>
+                        <td>Submit Data Use Agreement</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UK Biobank</strong></td>
+                        <td>Institutional access only</td>
+                        <td>Proposal + ethical approval</td>
+                        <td>Research ethics committee review</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DrugBank</strong></td>
+                        <td>Creative Commons (research)</td>
+                        <td>Commercial license for production</td>
+                        <td>Academic vs commercial use distinction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NHS Data</strong></td>
+                        <td>Open government license (some)</td>
+                        <td>Data Sharing Agreement (DSA)</td>
+                        <td>IG toolkit compliance required</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="security-features">
+            <div class="security-card">
+                <h3>🔐 Encryption</h3>
+                <p>TLS 1.3 in transit<br>AES-256 at rest</p>
+            </div>
+            <div class="security-card">
+                <h3>📊 Audit Logging</h3>
+                <p>Complete access trails<br>Monthly compliance reports</p>
+            </div>
+            <div class="security-card">
+                <h3>🛡️ Data Governance</h3>
+                <p>Ethics board oversight<br>Consent management</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for detailed information -->
+    <div id="public-data-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('public-data')">&times;</span>
+            <h2>📘 Open Medical Guidelines</h2>
+            <div class="detail-section">
+                <h4>Data Sources:</h4>
+                <ul class="detail-list">
+                    <li>NICE Guidelines - UK clinical excellence standards</li>
+                    <li>PubMed - Medical research database</li>
+                    <li>Cochrane Reviews - Systematic reviews and meta-analyses</li>
+                </ul>
+            </div>
+            <div class="detail-section">
+                <h4>Access Level: Public</h4>
+                <p>No licensing requirements. Freely accessible medical guidelines, research papers, and clinical standards that form the foundation of evidence-based medicine.</p>
+            </div>
+            <div class="detail-section">
+                <h4>Usage in AI System:</h4>
+                <ul class="detail-list">
+                    <li>Training data for clinical decision algorithms</li>
+                    <li>Reference standards for treatment recommendations</li>
+                    <li>Evidence base for drug interaction warnings</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="clinical-data-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('clinical-data')">&times;</span>
+            <h2>🏥 Clinical Datasets (MIMIC-IV)</h2>
+            <div class="detail-section">
+                <h4>Data Source: PhysioNet</h4>
+                <p>Critical care database containing deidentified health data from patients admitted to ICUs at the Beth Israel Deaconess Medical Center.</p>
+            </div>
+            <div class="detail-section">
+                <h4>Access Requirements:</h4>
+                <ul class="detail-list">
+                    <li>Complete PhysioNet credentialing course</li>
+                    <li>Sign Data Use Agreement (DUA)</li>
+                    <li>Institutional review board approval</li>
+                    <li>Annual recertification required</li>
+                </ul>
+            </div>
+            <div class="detail-section">
+                <h4>Data Types Available:</h4>
+                <ul class="detail-list">
+                    <li>Patient demographics and admission details</li>
+                    <li>Laboratory test results and vital signs</li>
+                    <li>Medication records and procedures</li>
+                    <li>Discharge summaries and notes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="patient-role-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('patient-role')">&times;</span>
+            <h2>👤 Patient Role Access</h2>
+            <div class="detail-section">
+                <h4>Data Access Permissions:</h4>
+                <ul class="detail-list">
+                    <li>Personal Electronic Health Records (EHR)</li>
+                    <li>Prescription history and current medications</li>
+                    <li>Symptom tracking and health monitoring data</li>
+                    <li>Feedback and satisfaction ratings</li>
+                    <li>Appointment history and upcoming visits</li>
+                </ul>
+            </div>
+            <div class="detail-section">
+                <h4>Security Features:</h4>
+                <ul class="detail-list">
+                    <li>OAuth 2.0 authentication with JWT tokens</li>
+                    <li>Permission scope: read:own_data, write:feedback</li>
+                    <li>Session timeout and multi-factor authentication</li>
+                    <li>Consent management and data portability</li>
+                </ul>
+            </div>
+            <div class="detail-section">
+                <h4>Privacy Controls:</h4>
+                <ul class="detail-list">
+                    <li>Granular consent for data sharing</li>
+                    <li>Right to data deletion (GDPR compliance)</li>
+                    <li>Audit trail of who accessed their data</li>
+                    <li>Ability to revoke access permissions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId + '-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId + '-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let i = 0; i < modals.length; i++) {
+                if (event.target === modals[i]) {
+                    modals[i].style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        }
+
+        // Add entrance animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.data-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+
+            const roleCards = document.querySelectorAll('.role-card');
+            roleCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
+                }, 1000 + (index * 100));
+            });
+
+            const securityCards = document.querySelectorAll('.security-card');
+            securityCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                }, 1500 + (index * 200));
+            });
+        });
+
+        // Add additional modals for other data types and roles
+        const additionalModals = {
+            'drug-data': {
+                title: '💊 Drug Databases',
+                sections: [
+                    { title: 'Data Sources', content: ['DrugBank - Comprehensive drug information', 'DailyMed - FDA drug labeling', 'RxNorm - Standardized drug names'] },
+                    { title: 'Licensing Model', content: ['Free for academic research', 'Commercial license required for production', 'API rate limits apply'] }
+                ]
+            },
+            'ehr-data': {
+                title: '📋 EHR/Patient Data',
+                sections: [
+                    { title: 'Compliance Requirements', content: ['NHS Information Governance Toolkit', 'Data Security and Protection Toolkit (DSPT)', 'GDPR compliance mandatory'] },
+                    { title: 'Access Controls', content: ['Role-based permissions', 'Audit logging required', 'Real-time monitoring'] }
+                ]
+            }
+        };
+
+        // Create additional modal HTML dynamically if needed
+        Object.keys(additionalModals).forEach(modalId => {
+            if (!document.getElementById(modalId + '-modal')) {
+                const modal = document.createElement('div');
+                modal.id = modalId + '-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close" onclick="closeModal('${modalId}')">&times;</span>
+                        <h2>${additionalModals[modalId].title}</h2>
+                        ${additionalModals[modalId].sections.map(section => `
+                            <div class="detail-section">
+                                <h4>${section.title}:</h4>
+                                <ul class="detail-list">
+                                    ${section.content.map(item => `<li>${item}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+        });
+    </script>
+</body>
+</html>

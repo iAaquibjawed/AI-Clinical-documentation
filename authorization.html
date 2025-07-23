@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Clinical Decision Support - Authorization Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .section h2 {
+            color: #4a5568;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .overview-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: #8b4513;
+        }
+
+        .overview-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .role-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            border: 2px solid #667eea;
+        }
+
+        .role-card h3 {
+            color: #2d3748;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .role-icon {
+            font-size: 1.5em;
+        }
+
+        .permissions-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .permissions-list li {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            border-left: 4px solid #38b2ac;
+        }
+
+        .flow-diagram {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .flow-step {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: "↓";
+            display: block;
+            text-align: center;
+            font-size: 2em;
+            margin: 10px 0;
+            color: #ffd700;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-step h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .tools-stack {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tool-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .tool-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .tool-item .tool-name {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .scopes-example {
+            background: #1a202c;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .audit-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            margin: 20px 0;
+        }
+
+        .audit-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .audit-list li {
+            margin: 10px 0;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .security-practices {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .security-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #38b2ac;
+        }
+
+        .security-item h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .final-diagram {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .diagram-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .diagram-node {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 2px solid #805ad5;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .diagram-arrow {
+            font-size: 2em;
+            color: #805ad5;
+        }
+
+        .highlight-box {
+            background: #e6fffa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #38b2ac;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .roles-grid,
+            .tools-grid,
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram-flow {
+                flex-direction: column;
+            }
+
+            .diagram-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 AI-Driven Clinical Decision Support System</h1>
+            <p>Authorization Strategy & Access Control</p>
+        </div>
+
+        <div class="section">
+            <h2>🧭 1. System Overview</h2>
+            <div class="overview-box">
+                <h3>Authorization Mission</h3>
+                <p>Our authorization framework ensures that <strong>only the right people</strong> (doctors, patients, pharmacists, admins) can access <strong>only the data and features they're authorized to use</strong>. We implement <strong>Role-Based Access Control (RBAC)</strong> with <strong>OAuth 2.0 and JWT</strong> to create a secure, auditable, and scalable authorization system for healthcare data.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔑 2. Authentication vs Authorization</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Purpose</th>
+                        <th>Healthcare Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Authentication</strong></td>
+                        <td>Verifies <em>who</em> you are</td>
+                        <td>Logging in with NHS ID or Hospital credentials</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Authorization</strong></td>
+                        <td>Verifies <em>what</em> you can access</td>
+                        <td>A doctor can access patient A's data but not patient B's</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🧠 3. Role-Based Access Control (RBAC)</h2>
+            <div class="roles-grid">
+                <div class="role-card">
+                    <h3><span class="role-icon">👤</span>Patient</h3>
+                    <ul class="permissions-list">
+                        <li>View own prescriptions & medical history</li>
+                        <li>Access personal symptom tracking</li>
+                        <li>Receive medication alerts & reminders</li>
+                        <li>View wearable device data integration</li>
+                        <li>Manage personal health dashboard</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <h3><span class="role-icon">👩‍⚕️</span>Doctor</h3>
+                    <ul class="permissions-list">
+                        <li>View assigned patient data & records</li>
+                        <li>Issue and modify prescriptions</li>
+                        <li>Access AI-generated clinical insights</li>
+                        <li>Review drug interaction warnings</li>
+                        <li>Generate treatment recommendations</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <h3><span class="role-icon">💊</span>Pharmacist</h3>
+                    <ul class="permissions-list">
+                        <li>View patient prescriptions for dispensing</li>
+                        <li>Access inventory management alerts</li>
+                        <li>Review drug interaction warnings</li>
+                        <li>Update medication availability status</li>
+                        <li>Generate dispensing reports</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <h3><span class="role-icon">⚙️</span>Admin</h3>
+                    <ul class="permissions-list">
+                        <li>Full system access & configuration</li>
+                        <li>User management & role assignment</li>
+                        <li>System audit logs & compliance reports</li>
+                        <li>Security monitoring & incident response</li>
+                        <li>Integration & API key management</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <h3><span class="role-icon">📊</span>Data Scientist</h3>
+                    <ul class="permissions-list">
+                        <li>Access anonymized training datasets</li>
+                        <li>Model performance monitoring</li>
+                        <li>Statistical analysis & reporting</li>
+                        <li>Research data export (de-identified)</li>
+                        <li>ML pipeline management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                ✅ <strong>Dual Enforcement:</strong> RBAC is enforced both on the frontend (UI component rendering) and backend (API endpoint access) for comprehensive security.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧾 4. Authorization Flow (OAuth 2.0 + JWT)</h2>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>[1] User Authentication</h4>
+                    <p>User logs in via NHS login, Hospital ID, or secure email authentication</p>
+                </div>
+
+                <div class="flow-step">
+                    <h4>[2] Token Issuance</h4>
+                    <p>Identity Provider issues an OAuth 2.0 Access Token with embedded JWT claims</p>
+                </div>
+
+                <div class="flow-step">
+                    <h4>[3] Role & Permission Embedding</h4>
+                    <p>JWT token contains user role, permissions, and scope claims for authorization</p>
+                </div>
+
+                <div class="flow-step">
+                    <h4>[4] Backend Validation</h4>
+                    <p>Backend API validates JWT signature and checks role permissions before granting access</p>
+                </div>
+
+                <div class="flow-step">
+                    <h4>[5] Frontend Authorization</h4>
+                    <p>Frontend dynamically hides/shows UI components based on user's authorized role</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📌 5. Technology Stack & Tools</h2>
+            <div class="tools-stack">
+                <h3 style="text-align: center; margin-bottom: 20px; color: white;">Recommended Authorization Technology Stack</h3>
+                <div class="tools-grid">
+                    <div class="tool-item">
+                        <h4>Identity Provider</h4>
+                        <p>Centralized authentication service with NHS integration support</p>
+                        <div class="tool-name">Auth0 / Keycloak / Azure AD</div>
+                    </div>
+
+                    <div class="tool-item">
+                        <h4>Access Tokens</h4>
+                        <p>Industry-standard token format for secure authorization</p>
+                        <div class="tool-name">OAuth 2.0 + JWT (RFC 7519)</div>
+                    </div>
+
+                    <div class="tool-item">
+                        <h4>Token Validation</h4>
+                        <p>Server-side middleware for request authorization</p>
+                        <div class="tool-name">Express/Node.js or Django Middleware</div>
+                    </div>
+
+                    <div class="tool-item">
+                        <h4>Session Management</h4>
+                        <p>Secure token lifecycle management</p>
+                        <div class="tool-name">Short-lived tokens + Refresh rotation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔁 6. Fine-Grained Scopes & Permissions</h2>
+            <p>For precise control over feature access, we implement permission scopes within JWT tokens:</p>
+
+            <div class="scopes-example">
+{
+  "sub": "user-abc123",
+  "role": "doctor",
+  "hospital_id": "nhs-trust-456",
+  "scopes": [
+    "read:patients",
+    "write:prescriptions",
+    "read:recommendations",
+    "access:drug-interactions"
+  ],
+  "patient_access": ["patient-789", "patient-101"]
+}
+            </div>
+
+            <div class="highlight-box">
+                ✅ <strong>Granular Control:</strong> This approach enables extremely specific feature access control, essential for third-party API integrations and research modules while maintaining patient privacy.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔎 7. Audit Logging & Compliance</h2>
+            <div class="audit-box">
+                <h3>📋 Every Access Event is Logged</h3>
+                <ul class="audit-list">
+                    <li><strong>User Identification:</strong> User ID, role, and session information</li>
+                    <li><strong>Resource Access:</strong> Specific data or feature accessed with timestamps</li>
+                    <li><strong>Action Tracking:</strong> Create, read, update, delete operations logged</li>
+                    <li><strong>Tamper-Proof Storage:</strong> Immutable audit logs with cryptographic integrity</li>
+                    <li><strong>Compliance Reporting:</strong> Automated reports for NHS DSPT, GDPR, and HIPAA</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center; margin-top: 15px; font-style: italic;">
+                Audit logs available in Grafana Loki, Elasticsearch, or dedicated compliance databases
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>🛡️ 8. Security Best Practices</h2>
+            <div class="security-practices">
+                <div class="security-grid">
+                    <div class="security-item">
+                        <h4>🔐 Token Security</h4>
+                        <p>All JWT tokens signed using <strong>asymmetric encryption (RS256)</strong> with rotating key pairs for maximum security</p>
+                    </div>
+
+                    <div class="security-item">
+                        <h4>🛡️ Endpoint Protection</h4>
+                        <p>All sensitive endpoints protected with <strong>scoped access control</strong> and <strong>CSRF protection</strong></p>
+                    </div>
+
+                    <div class="security-item">
+                        <h4>🔒 Step-up Authentication</h4>
+                        <p>Admin actions require <strong>additional verification</strong> (password re-entry or 2FA)</p>
+                    </div>
+
+                    <div class="security-item">
+                        <h4>🚨 Anomaly Detection</h4>
+                        <p><strong>ML-powered monitoring</strong> for suspicious access patterns and automated threat response</p>
+                    </div>
+
+                    <div class="security-item">
+                        <h4>☁️ Cloud Integration</h4>
+                        <p>Deep integration with <strong>AWS IAM roles</strong> and cloud security policies</p>
+                    </div>
+
+                    <div class="security-item">
+                        <h4>⏱️ Session Management</h4>
+                        <p><strong>Short token lifetimes</strong> with automatic refresh and secure session invalidation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ 9. Authorization Flow Summary</h2>
+            <div class="final-diagram">
+                <h3 style="margin-bottom: 20px; color: #4a5568;">Complete Authorization Architecture</h3>
+                <div class="diagram-flow">
+                    <div class="diagram-node">
+                        <strong>👤 User</strong><br>
+                        <small>Healthcare Professional</small>
+                    </div>
+                    <div class="diagram-arrow">→</div>
+                    <div class="diagram-node">
+                        <strong>🔑 Login</strong><br>
+                        <small>NHS ID / Hospital Auth</small>
+                    </div>
+                    <div class="diagram-arrow">→</div>
+                    <div class="diagram-node">
+                        <strong>🏛️ Identity Provider</strong><br>
+                        <small>Auth0 / Keycloak</small>
+                    </div>
+                    <div class="diagram-arrow">→</div>
+                    <div class="diagram-node">
+                        <strong>🎫 JWT Token</strong><br>
+                        <small>Role + Permissions</small>
+                    </div>
+                </div>
+
+                <div style="margin: 30px 0; font-size: 2em; color: #805ad5;">↓</div>
+
+                <div class="diagram-flow">
+                    <div class="diagram-node">
+                        <strong>💻 Frontend App</strong><br>
+                        <small>UI Authorization</small>
+                    </div>
+                    <div class="diagram-arrow">←</div>
+                    <div class="diagram-node">
+                        <strong>🔒 Middleware</strong><br>
+                        <small>Token Validation</small>
+                    </div>
+                    <div class="diagram-arrow">←</div>
+                    <div class="diagram-node">
+                        <strong>🖥️ Backend API</strong><br>
+                        <small>Endpoint Protection</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: white; margin-top: 40px; padding: 20px;">
+            <p>🏥 <strong>Secure, Compliant, and Scalable Authorization for Critical Healthcare Systems</strong></p>
+        </div>
+    </div>
+</body>
+</html>
